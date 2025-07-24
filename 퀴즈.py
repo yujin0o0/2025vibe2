@@ -1,91 +1,100 @@
 import streamlit as st
 import random
+import time
 
-st.set_page_config(page_title="🌟 이모지 퀴즈 게임", page_icon="🎨", layout="centered")
+st.set_page_config(page_title="🎬 Emoji Movie Quiz!", page_icon="🍿", layout="centered")
 
-# 🎬 퀴즈 데이터
+# --------------------
+# 🎨 CSS for sparkles & animation
+st.markdown("""
+    <style>
+        .emoji-box {
+            font-size: 80px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        .correct {
+            color: #00FFAA;
+            font-size: 60px;
+            animation: pop 0.7s ease-in-out;
+        }
+
+        .wrong {
+            color: #FF6666;
+            font-size: 40px;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0.2; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            50% { transform: translateX(8px); }
+            75% { transform: translateX(-4px); }
+            100% { transform: translateX(0); }
+        }
+
+        .stTextInput>div>div>input {
+            font-size: 24px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# --------------------
+# 🎥 Quiz Data
 quiz_data = [
-    {"emoji": "🦁👑", "answer": "라이언킹"},
-    {"emoji": "🧑‍🚀🌕", "answer": "아폴로 11"},
-    {"emoji": "❄️⛄️", "answer": "겨울왕국"},
-    {"emoji": "🧙‍♂️🪄⚡", "answer": "해리포터"},
+    {"emoji": "🦁👑", "answer": "라이언 킹"},
+    {"emoji": "🧑‍🚀🌕", "answer": "인터스텔라"},
+    {"emoji": "🧙‍♂️💍", "answer": "반지의 제왕"},
+    {"emoji": "❄️👭", "answer": "겨울왕국"},
     {"emoji": "🐟🔍", "answer": "니모를 찾아서"},
-    {"emoji": "🚢🧊💔", "answer": "타이타닉"},
-    {"emoji": "🎤🕺", "answer": "보헤미안 랩소디"},
-    {"emoji": "🎭🤡", "answer": "조커"},
-    {"emoji": "🧑‍🔬👨‍👩‍👧‍👦🧬", "answer": "기생충"},
+    {"emoji": "🧑🏻🕷️", "answer": "스파이더맨"},
+    {"emoji": "🤖🚗", "answer": "트랜스포머"},
+    {"emoji": "🧑🏻⚡", "answer": "해리포터"},
+    {"emoji": "👸🍎", "answer": "백설공주"},
+    {"emoji": "🐉👦", "answer": "드래곤 길들이기"},
 ]
 
-# 🎈 상태 초기화
-if "quiz_index" not in st.session_state:
-    st.session_state.quiz_index = random.randint(0, len(quiz_data) - 1)
-    st.session_state.input = ""
-    st.session_state.result = None
+st.markdown("<h1 style='text-align:center;'>🍿 이모지 퀴즈: 무슨 영화일까요?</h1>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; font-size:20px;'>이모지를 보고 떠오르는 영화를 맞혀보세요!</p>", unsafe_allow_html=True)
 
-quiz = quiz_data[st.session_state.quiz_index]
+# --------------------
+# 🎲 Quiz Logic
+if "index" not in st.session_state:
+    st.session_state.index = random.randint(0, len(quiz_data)-1)
+if "score" not in st.session_state:
+    st.session_state.score = 0
 
-# 🎀 제목
-st.markdown("""
-    <h1 style='text-align:center; color:#ff6ec7; font-size:60px; text-shadow: 2px 2px #ffb3ec;'>🌟 이모지 퀴즈 🌟</h1>
-    <h4 style='text-align:center; color:#9f5fdf;'>이 이모지가 의미하는 영화/노래/인물을 맞혀보세요! 💡</h4>
-""", unsafe_allow_html=True)
+current = quiz_data[st.session_state.index]
 
-# 🧩 이모지 문제
-st.markdown(f"<div style='font-size:80px; text-align:center;'>{quiz['emoji']}</div>", unsafe_allow_html=True)
+st.markdown(f"<div class='emoji-box'>{current['emoji']}</div>", unsafe_allow_html=True)
 
-# 🎯 정답 입력
-user_input = st.text_input("정답을 입력하세요 ✨", value=st.session_state.input)
+answer = st.text_input("🎯 정답은?", "")
 
-# 🎁 제출 버튼
-if st.button("💖 제출하기"):
-    st.session_state.input = user_input
-    if user_input.strip().lower() == quiz["answer"].lower():
-        st.session_state.result = "correct"
+if st.button("✅ 제출하기"):
+    if answer.strip().lower() == current["answer"].lower():
+        st.markdown("<p class='correct'>🎉 정답입니다! 풍선 퐁퐁~</p>", unsafe_allow_html=True)
+        st.balloons()
+        st.session_state.score += 1
     else:
-        st.session_state.result = "wrong"
+        st.markdown("<p class='wrong'>😭 오답이에요! 다시 도전!</p>", unsafe_allow_html=True)
 
-# 🎉 결과 표시
-if st.session_state.result == "correct":
-    st.success("🌈 정답이에요! 멋져요! 🎉")
-    st.markdown("<div style='font-size:40px; text-align:center;'>🎆✨🎇💖🌟✨🎉</div>", unsafe_allow_html=True)
-elif st.session_state.result == "wrong":
-    st.error("😭 오답이에요! 다시 시도해보세요!")
-    st.markdown("<div style='font-size:30px; text-align:center;'>💧💧💧</div>", unsafe_allow_html=True)
+    time.sleep(1)
+    st.session_state.index = random.randint(0, len(quiz_data)-1)
+    st.experimental_rerun()
 
-# 🔁 다음 문제 버튼
-if st.session_state.result:
-    next_q = st.button("🔮 다음 문제로!")
-
-    if next_q:
-        st.session_state.quiz_index = random.randint(0, len(quiz_data) - 1)
-        st.session_state.input = ""
-        st.session_state.result = None
-        st.experimental_rerun()
-
-# 🦄 CSS 꾸미기
-st.markdown("""
-<style>
-    .stTextInput > div > div > input {
-        font-size: 20px;
-        padding: 0.75em;
-        border-radius: 10px;
-        border: 2px solid #ff6ec7;
-        background-color: #fff0f9;
-    }
-
-    .stButton > button {
-        font-size: 18px;
-        background-color: #ff6ec7;
-        color: white;
-        border-radius: 12px;
-        padding: 0.6em 1.2em;
-        transition: 0.3s ease;
-        border: none;
-    }
-
-    .stButton > button:hover {
-        background-color: #ff94da;
-        transform: scale(1.05);
-    }
-</style>
-""", unsafe_allow_html=True)
+# --------------------
+# 🧮 Score
+st.markdown(f"<hr><h3 style='text-align:center;'>✨ 현재 점수: {st.session_state.score} 점 ✨</h3>", unsafe_allow_html=True)
