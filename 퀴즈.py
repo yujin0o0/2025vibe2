@@ -1,11 +1,10 @@
 import streamlit as st
 import random
-from streamlit_extras.let_it_rain import rain
 
 st.set_page_config(page_title="🎨 이모지 퀴즈!", page_icon="✨", layout="centered")
 
-# -------------------- 데이터 --------------------
-emoji_quiz = [
+# -------------------- 퀴즈 데이터 --------------------
+quiz_data = [
     {"emoji": "🦁👑", "answer": "라이언킹"},
     {"emoji": "🧑‍🚀🌕", "answer": "아폴로 11"},
     {"emoji": "❄️⛄️", "answer": "겨울왕국"},
@@ -17,64 +16,63 @@ emoji_quiz = [
     {"emoji": "🧑‍🔬👨‍👩‍👧‍👦🧬", "answer": "기생충"},
 ]
 
-# -------------------- 초기 설정 --------------------
+# -------------------- 초기 상태 --------------------
 if "quiz" not in st.session_state:
-    st.session_state.quiz = random.choice(emoji_quiz)
-    st.session_state.result = None
+    st.session_state.quiz = random.choice(quiz_data)
     st.session_state.input = ""
+    st.session_state.result = None
 
-st.markdown("<h1 style='text-align:center; color:#ff66c4;'>🎨 이모지 퀴즈!</h1>", unsafe_allow_html=True)
-st.markdown("<h3 style='text-align:center;'>이 이모지 조합이 나타내는 영화/노래/유명인을 맞혀보세요! 🎬🎶</h3>", unsafe_allow_html=True)
+# -------------------- 제목 --------------------
+st.markdown("""
+    <h1 style='text-align:center; color:#ff69b4;'>✨ 이모지 퀴즈 게임 ✨</h1>
+    <h4 style='text-align:center;'>이 이모지가 의미하는 영화/노래/인물을 맞혀보세요! 🎬🎶</h4>
+""", unsafe_allow_html=True)
 
-# -------------------- 퀴즈 표시 --------------------
-st.markdown(f"<div style='font-size:60px; text-align:center;'>{st.session_state.quiz['emoji']}</div>", unsafe_allow_html=True)
+# -------------------- 이모지 퀴즈 --------------------
+st.markdown(f"<div style='font-size:70px; text-align:center;'>{st.session_state.quiz['emoji']}</div>", unsafe_allow_html=True)
 
-# -------------------- 입력 --------------------
-st.session_state.input = st.text_input("정답을 입력하세요! 😊", key="answer_input")
+# -------------------- 사용자 입력 --------------------
+user_input = st.text_input("👇 정답을 입력하세요:", value=st.session_state.input)
 
-if st.button("제출하기 🎯"):
-    user_answer = st.session_state.input.strip().lower()
-    correct_answer = st.session_state.quiz["answer"].strip().lower()
-
-    if user_answer == correct_answer:
-        st.success("🎉 정답입니다! 멋져요!")
-        rain(
-            emoji="🎉",
-            font_size=54,
-            falling_speed=8,
-            animation_length=3,
-        )
+# -------------------- 제출 버튼 --------------------
+if st.button("🎯 제출하기"):
+    st.session_state.input = user_input
+    correct = st.session_state.quiz['answer'].strip().lower()
+    if user_input.strip().lower() == correct:
+        st.session_state.result = "correct"
     else:
-        st.error("😭 오답이에요! 다시 시도해보세요!")
-        rain(
-            emoji="💧",
-            font_size=30,
-            falling_speed=10,
-            animation_length=2,
-        )
+        st.session_state.result = "wrong"
 
-    # 다음 퀴즈로 갱신 버튼
-    if st.button("🔄 다음 문제로!"):
-        st.session_state.quiz = random.choice(emoji_quiz)
+# -------------------- 결과 출력 --------------------
+if st.session_state.result == "correct":
+    st.success("🎉 정답입니다! 멋져요! 🎉")
+    st.markdown("<div style='font-size:40px; text-align:center;'>🌈✨💖🎊✨🌈</div>", unsafe_allow_html=True)
+elif st.session_state.result == "wrong":
+    st.error("😭 오답이에요! 다시 시도해보세요!")
+    st.markdown("<div style='font-size:30px; text-align:center;'>💧💧💧</div>", unsafe_allow_html=True)
+
+# -------------------- 다음 문제 --------------------
+if st.session_state.result:
+    if st.button("🔁 다음 문제"):
+        st.session_state.quiz = random.choice(quiz_data)
         st.session_state.input = ""
-        st.rerun()
+        st.session_state.result = None
+        st.experimental_rerun()
 
-# -------------------- 꾸미기 --------------------
-st.markdown(
-    """
-    <style>
-        .stTextInput>div>div>input {
-            font-size: 20px;
-            padding: 10px;
-        }
-        .stButton>button {
-            background-color: #ff66c4;
-            color: white;
-            font-size: 18px;
-            padding: 10px 20px;
-            border-radius: 12px;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+# -------------------- 스타일 --------------------
+st.markdown("""
+<style>
+    .stTextInput > div > div > input {
+        font-size: 20px;
+        padding: 0.75em;
+        border-radius: 10px;
+    }
+    .stButton > button {
+        font-size: 18px;
+        background-color: #ff69b4;
+        color: white;
+        border-radius: 10px;
+        padding: 0.5em 1.5em;
+    }
+</style>
+""", unsafe_allow_html=True)
