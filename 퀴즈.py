@@ -1,11 +1,10 @@
 import streamlit as st
 import random
-import time
 
 st.set_page_config(page_title="🎬 Emoji Movie Quiz!", page_icon="🍿", layout="centered")
 
 # --------------------
-# 🎨 CSS for sparkles & animation
+# 🎨 CSS for 화려한 애니메이션
 st.markdown("""
     <style>
         .emoji-box {
@@ -53,7 +52,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --------------------
-# 🎥 Quiz Data
+# 퀴즈 데이터
 quiz_data = [
     {"emoji": "🦁👑", "answer": "라이언 킹"},
     {"emoji": "🧑‍🚀🌕", "answer": "인터스텔라"},
@@ -67,50 +66,55 @@ quiz_data = [
     {"emoji": "🐉👦", "answer": "드래곤 길들이기"},
 ]
 
+# --------------------
+# 상태 초기화
+if "score" not in st.session_state:
+    st.session_state.score = 0
+if "quiz_index" not in st.session_state:
+    st.session_state.quiz_index = random.randint(0, len(quiz_data)-1)
+if "answered" not in st.session_state:
+    st.session_state.answered = False
+if "correct" not in st.session_state:
+    st.session_state.correct = False
+
+# --------------------
+# UI 표시
 st.markdown("<h1 style='text-align:center;'>🍿 이모지 퀴즈: 무슨 영화일까요?</h1>", unsafe_allow_html=True)
 st.markdown("<p style='text-align:center; font-size:20px;'>이모지를 보고 떠오르는 영화를 맞혀보세요!</p>", unsafe_allow_html=True)
 
-# --------------------
-# 🔁 상태 관리
-if "quiz_index" not in st.session_state:
-    st.session_state.quiz_index = random.randint(0, len(quiz_data) - 1)
-if "score" not in st.session_state:
-    st.session_state.score = 0
-if "show_result" not in st.session_state:
-    st.session_state.show_result = False
-if "last_correct" not in st.session_state:
-    st.session_state.last_correct = None
-
-# 현재 문제
 current = quiz_data[st.session_state.quiz_index]
 
 st.markdown(f"<div class='emoji-box'>{current['emoji']}</div>", unsafe_allow_html=True)
 
-# 입력 & 제출
-answer = st.text_input("🎯 정답은?", key="input_answer")
-
-if st.button("✅ 제출하기"):
-    if answer.strip().lower() == current["answer"].lower():
-        st.session_state.show_result = True
-        st.session_state.last_correct = True
-        st.session_state.score += 1
-    else:
-        st.session_state.show_result = True
-        st.session_state.last_correct = False
+# --------------------
+# 정답 입력
+if not st.session_state.answered:
+    answer = st.text_input("🎯 정답은?", key="answer_input")
+    if st.button("✅ 제출하기"):
+        if answer.strip().lower() == current["answer"].lower():
+            st.session_state.correct = True
+            st.session_state.score += 1
+        else:
+            st.session_state.correct = False
+        st.session_state.answered = True
+        st.experimental_set_query_params(dummy=random.randint(0, 10000))  # 강제 refresh 없이 키값 변화 유도
+        st.stop()
 
 # --------------------
-# 🎉 정답 피드백
-if st.session_state.show_result:
-    if st.session_state.last_correct:
+# 결과 표시
+if st.session_state.answered:
+    if st.session_state.correct:
         st.markdown("<p class='correct'>🎉 정답입니다! 풍선 퐁퐁~</p>", unsafe_allow_html=True)
         st.balloons()
     else:
-        st.markdown("<p class='wrong'>😭 땡! 정답은 <b>{}</b>입니다!</p>".format(current["answer"]), unsafe_allow_html=True)
+        st.markdown(f"<p class='wrong'>😭 땡! 정답은 <b>{current['answer']}</b>입니다!</p>", unsafe_allow_html=True)
 
-    time.sleep(1.5)
-    st.session_state.quiz_index = random.randint(0, len(quiz_data) - 1)
-    st.session_state.show_result = False
-    st.experimental_rerun()  # 지금은 여긴 괜찮음. 그래도 필요하면 제거 가능
+    if st.button("🔄 다음 문제"):
+        st.session_state.quiz_index = random.randint(0, len(quiz_data)-1)
+        st.session_state.answered = False
+        st.session_state.correct = False
+        st.experimental_set_query_params(refresh=random.randint(0, 10000))  # 강제 refresh 유도
+        st.experimental_rerun()
 
 # --------------------
 # 점수
