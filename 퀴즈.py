@@ -71,30 +71,47 @@ st.markdown("<h1 style='text-align:center;'>🍿 이모지 퀴즈: 무슨 영화
 st.markdown("<p style='text-align:center; font-size:20px;'>이모지를 보고 떠오르는 영화를 맞혀보세요!</p>", unsafe_allow_html=True)
 
 # --------------------
-# 🎲 Quiz Logic
-if "index" not in st.session_state:
-    st.session_state.index = random.randint(0, len(quiz_data)-1)
+# 🔁 상태 관리
+if "quiz_index" not in st.session_state:
+    st.session_state.quiz_index = random.randint(0, len(quiz_data) - 1)
 if "score" not in st.session_state:
     st.session_state.score = 0
+if "show_result" not in st.session_state:
+    st.session_state.show_result = False
+if "last_correct" not in st.session_state:
+    st.session_state.last_correct = None
 
-current = quiz_data[st.session_state.index]
+# 현재 문제
+current = quiz_data[st.session_state.quiz_index]
 
 st.markdown(f"<div class='emoji-box'>{current['emoji']}</div>", unsafe_allow_html=True)
 
-answer = st.text_input("🎯 정답은?", "")
+# 입력 & 제출
+answer = st.text_input("🎯 정답은?", key="input_answer")
 
 if st.button("✅ 제출하기"):
     if answer.strip().lower() == current["answer"].lower():
-        st.markdown("<p class='correct'>🎉 정답입니다! 풍선 퐁퐁~</p>", unsafe_allow_html=True)
-        st.balloons()
+        st.session_state.show_result = True
+        st.session_state.last_correct = True
         st.session_state.score += 1
     else:
-        st.markdown("<p class='wrong'>😭 오답이에요! 다시 도전!</p>", unsafe_allow_html=True)
-
-    time.sleep(1)
-    st.session_state.index = random.randint(0, len(quiz_data)-1)
-    st.experimental_rerun()
+        st.session_state.show_result = True
+        st.session_state.last_correct = False
 
 # --------------------
-# 🧮 Score
+# 🎉 정답 피드백
+if st.session_state.show_result:
+    if st.session_state.last_correct:
+        st.markdown("<p class='correct'>🎉 정답입니다! 풍선 퐁퐁~</p>", unsafe_allow_html=True)
+        st.balloons()
+    else:
+        st.markdown("<p class='wrong'>😭 땡! 정답은 <b>{}</b>입니다!</p>".format(current["answer"]), unsafe_allow_html=True)
+
+    time.sleep(1.5)
+    st.session_state.quiz_index = random.randint(0, len(quiz_data) - 1)
+    st.session_state.show_result = False
+    st.experimental_rerun()  # 지금은 여긴 괜찮음. 그래도 필요하면 제거 가능
+
+# --------------------
+# 점수
 st.markdown(f"<hr><h3 style='text-align:center;'>✨ 현재 점수: {st.session_state.score} 점 ✨</h3>", unsafe_allow_html=True)
