@@ -108,4 +108,3 @@ st.markdown(f"""
     # 캐릭터 대사 출력
     st.markdown(f"<div class='bubble'>{character_line}</div>", unsafe_allow_html=True)
     st.markdown("🔁 다시 도전해 보세요! 무대는 당신의 것 💖")
-
