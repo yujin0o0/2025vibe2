@@ -82,7 +82,7 @@ st.markdown(f"""
 st.markdown(f"<div class='custom-box'>", unsafe_allow_html=True)
 
 # 제목 및 소개
-st.markdown(f"# 🌟 아이돌 가위바위보 무대 🌟")
+st.markdown(f"# 🌟 가위바위보  🌟")
 st.markdown(f"### 🎤 {character} 등장! — {characters[character]['intro']}")
 
 # 유저 선택
