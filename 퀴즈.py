@@ -2,7 +2,7 @@ import streamlit as st
 import random
 
 st.set_page_config(page_title="🎬 Emoji Movie Quiz!", page_icon="🍿", layout="centered")
-
+st.markdown("<p style='text-align:center; color:gray;'>⚠️ 버튼은 가끔 한 번에 안 먹을 수 있어요!<br><b>‘제출하기’와 ‘다음 문제’ 버튼은 두 번 눌러주세요 💡</b></p>", unsafe_allow_html=True)
 # --------------------
 # 🎨 CSS for 화려한 애니메이션
 st.markdown("""
