@@ -44,15 +44,17 @@ themes = {
 character = st.selectbox("🎭 캐릭터를 고르세요!", list(characters.keys()))
 theme = st.selectbox("🖼️ 무대를 고르세요!", list(themes.keys()))
 
-# 스타일 커스터마이징
+# 배경색 커스터마이징 (페이지 전체는 제한적이라, 컨테이너처럼 느낌만 주기)
 st.markdown(f"""
     <style>
-    .main {{
+    .custom-box {{
         background-color: {themes[theme]};
+        padding: 30px;
+        border-radius: 20px;
     }}
     h1 {{
         text-align: center;
-        font-size: 60px;
+        font-size: 50px;
         color: #ff66cc;
         animation: glow 1.5s infinite alternate;
     }}
@@ -60,19 +62,38 @@ st.markdown(f"""
         from {{ text-shadow: 0 0 15px #ff66cc; }}
         to {{ text-shadow: 0 0 40px #ff33aa; }}
     }}
-    .rps-button > button {{
-        font-size: 30px !important;
-        padding: 1em !important;
-        background: linear-gradient(135deg, #ff69b4, #ffaaff, #ff69b4);
-        background-size: 400% 400%;
-        color: white;
-        border: none;
-        border-radius: 20px;
-        animation: sparkle 5s infinite linear;
+    .bubble {{
+        background-color: #ffffffcc;
+        border-radius: 15px;
+        padding: 1em;
+        margin: 1em 0;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        animation: pop 0.8s ease-in;
     }}
-    @keyframes sparkle {{
-        0% {{ background-position: 0% 50%; }}
-        50% {{ background-po가 전투 중..."):
+    @keyframes pop {{
+        0% {{ transform: scale(0.5); opacity: 0; }}
+        100% {{ transform: scale(1); opacity: 1; }}
+    }}
+    </style>
+""", unsafe_allow_html=True)
+
+st.markdown(f"<div class='custom-box'>", unsafe_allow_html=True)
+
+# 제목 및 소개
+st.markdown(f"# 🌟 아이돌 가위바위보 무대 🌟")
+st.markdown(f"### 🎤 {character} 등장! — {characters[character]['intro']}")
+
+# 유저 선택
+emojis = {"가위": "✌️", "바위": "✊", "보": "🖐️"}
+user_choice = st.radio("무엇을 낼까요?", ["가위", "바위", "보"], horizontal=True)
+
+# 대결 버튼
+game_start = st.button("✨ 쇼타임! 대결 GO! ✨")
+
+if game_start:
+    with st.spinner("🎶 귀요미 컴퓨터와 함께 전투 중..."):
         time.sleep(1.5)
 
     for i in ["3️⃣", "2️⃣", "1️⃣", "🎵"]:
@@ -80,31 +101,32 @@ st.markdown(f"""
         time.sleep(0.5)
 
     computer_choice = random.choice(["가위", "바위", "보"])
+
     st.markdown("---")
     st.markdown(f"### 👑 당신: {emojis[user_choice]} **{user_choice}**")
     st.markdown(f"### 🤖 상대: {emojis[computer_choice]} **{computer_choice}**")
     st.markdown("---")
 
-    result = ""
-    character_line = ""
-
+    # 판정
     if user_choice == computer_choice:
         result = "😮 **무승부!** 같은 생각이라니 놀라워요!"
-        character_line = characters[character]["tie"]
+        line = characters[character]['tie']
         st.info(result)
     elif (user_choice == "가위" and computer_choice == "보") or \
          (user_choice == "바위" and computer_choice == "가위") or \
          (user_choice == "보" and computer_choice == "바위"):
         result = "🎉 **당신이 이겼어요!!** 관객들의 환호가 쏟아집니다!"
-        character_line = characters[character]["win"]
-        st.balloons()
+        line = characters[character]['win']
         st.success(result)
+        st.balloons()
     else:
         result = "💥 **졌습니다...! 하지만 무대는 계속됩니다.**"
-        character_line = characters[character]["lose"]
-        st.snow()
+        line = characters[character]['lose']
         st.error(result)
+        st.snow()
 
     # 캐릭터 대사 출력
-    st.markdown(f"<div class='bubble'>{character_line}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='bubble'>{line}</div>", unsafe_allow_html=True)
     st.markdown("🔁 다시 도전해 보세요! 무대는 당신의 것 💖")
+
+st.markdown("</div>", unsafe_allow_html=True)
