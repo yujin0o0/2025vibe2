@@ -3,7 +3,7 @@ import random
 import time
 
 # 페이지 설정
-st.set_page_config(page_title="🌟 아이돌 가위바위보 대전 🌟", layout="centered", page_icon="🎤")
+st.set_page_config(page_title="🌟 가위바위보 대전 🌟", layout="centered", page_icon="🎤")
 
 # 캐릭터 설정
 characters = {
@@ -72,37 +72,7 @@ st.markdown(f"""
     }}
     @keyframes sparkle {{
         0% {{ background-position: 0% 50%; }}
-        50% {{ background-position: 100% 50%; }}
-        100% {{ background-position: 0% 50%; }}
-    }}
-    .bubble {{
-        background-color: #ffffffcc;
-        border-radius: 15px;
-        padding: 1em;
-        margin: 1em 0;
-        font-size: 20px;
-        font-weight: bold;
-        text-align: center;
-        animation: pop 1s ease-in;
-    }}
-    @keyframes pop {{
-        0% {{ transform: scale(0.5); opacity: 0; }}
-        100% {{ transform: scale(1); opacity: 1; }}
-    }}
-    </style>
-""", unsafe_allow_html=True)
-
-# 제목
-st.markdown(f"# 🌟 아이돌 가위바위보 무대 🌟")
-st.markdown(f"### 🎤 {character} 등장! — {characters[character]['intro']}")
-
-# 게임 선택
-emojis = {"가위": "✌️", "바위": "✊", "보": "🖐️"}
-user_choice = st.radio("무엇을 낼까요?", ["가위", "바위", "보"], horizontal=True)
-
-# 대결 시작
-if st.button("✨ 쇼타임! 대결 GO! ✨", key="battle"):
-    with st.spinner("🎶 음악과 함께 전투 중..."):
+        50% {{ background-po가 전투 중..."):
         time.sleep(1.5)
 
     for i in ["3️⃣", "2️⃣", "1️⃣", "🎵"]:
