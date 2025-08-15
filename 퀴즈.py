@@ -1,135 +1,115 @@
 import streamlit as st
 import random
+import time
 
-st.set_page_config(page_title="🎬 Emoji Movie Quiz!", page_icon="🍿", layout="centered")
-st.markdown("<p style='text-align:center; color:red;'>⚠️ 버튼은 가끔 한 번에 안 먹을 수 있어요!<br><b>‘제출하기’와 ‘다음 문제’ 버튼은 두 번씩 눌러주세요 💡</b></p>", unsafe_allow_html=True)
-# --------------------
-# 🎨 CSS for 화려한 애니메이션
+# 페이지 설정
+st.set_page_config(
+    page_title="🎬 영화 이모티콘 퀴즈 🍿",
+    page_icon="🎬",
+    layout="wide"
+)
+
+# 영화관 스타일 CSS 추가
 st.markdown("""
-    <style>
-        .emoji-box {
-            font-size: 80px;
-            text-align: center;
-            animation: pulse 2s infinite;
-        }
-
-        .correct {
-            color: #00FFAA;
-            font-size: 60px;
-            animation: pop 0.7s ease-in-out;
-        }
-
-        .wrong {
-            color: #FF6666;
-            font-size: 40px;
-            animation: shake 0.4s ease-in-out;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes pop {
-            0% { transform: scale(0.5); opacity: 0.2; }
-            50% { transform: scale(1.2); opacity: 1; }
-            100% { transform: scale(1); }
-        }
-
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            50% { transform: translateX(8px); }
-            75% { transform: translateX(-4px); }
-            100% { transform: translateX(0); }
-        }
-
-        .stTextInput>div>div>input {
-            font-size: 24px;
-        }
-    </style>
+<style>
+    .main {
+        background-color: #0d1117;
+        color: white;
+    }
+    .stApp {
+        background-image: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('https://img.freepik.com/free-photo/cinema-elements-red-background-with-copy-space_23-2148457853.jpg');
+        background-size: cover;
+    }
+    .title {
+        color: #FFD700;
+        text-align: center;
+        font-size: 50px;
+        text-shadow: 2px 2px 4px #000000;
+    }
+    .emoji-display {
+        background-color: rgba(0,0,0,0.7);
+        border-radius: 15px;
+        padding: 30px;
+        margin: 20px 0px;
+        border: 2px solid #FFD700;
+    }
+    .score-board {
+        background-color: rgba(128, 0, 0, 0.7);
+        padding: 10px;
+        border-radius: 10px;
+        text-align: center;
+        font-size: 24px;
+        font-weight: bold;
+        color: white;
+        border: 2px solid #FFD700;
+    }
+    .stButton>button {
+        background-color: #FFD700;
+        color: #000000;
+        font-weight: bold;
+    }
+    .stTextInput>div>div>input {
+        background-color: rgba(255,255,255,0.9);
+        color: black;
+        border: 2px solid #FFD700;
+    }
+    .category-header {
+        background-color: rgba(139, 0, 0, 0.8);
+        color: #FFD700;
+        padding: 5px 10px;
+        border-radius: 5px;
+        margin: 5px 0;
+    }
+    .movie-screen {
+        background-color: rgba(0,0,0,0.8);
+        border: 3px solid #8B0000;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+    }
+    .popcorn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        font-size: 40px;
+        animation: bounce 2s infinite;
+    }
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+    .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background-color: #f00;
+        animation: confetti 5s ease-in-out infinite;
+    }
+    @keyframes confetti {
+        0% { transform: translateY(0) rotate(0deg); }
+        100% { transform: translateY(100vh) rotate(720deg); }
+    }
+</style>
 """, unsafe_allow_html=True)
 
-# --------------------
-# 퀴즈 데이터
-quiz_data = [
-    {"emoji": "🦁👑", "answer": "라이언 킹", "level": 1},
-    {"emoji": "🧑‍🚀🌕", "answer": "인터스텔라", "level": 2},
-    {"emoji": "🧙‍♂️💍", "answer": "반지의 제왕", "level": 2},
-    {"emoji": "❄️👭", "answer": "겨울왕국", "level": 1},
-    {"emoji": "🐟🔍", "answer": "니모를 찾아서", "level": 1},
-    {"emoji": "🧑🏻🕷️", "answer": "스파이더맨", "level": 1},
-    {"emoji": "🧑🏻⚡", "answer": "해리포터", "level": 1},
-    {"emoji": "👸🍎", "answer": "백설공주", "level": 1},
-    {"emoji": "🐉👦", "answer": "드래곤 길들이기", "level": 2},
-    {"emoji": "🐼🥋", "answer": "쿵푸 팬더", "level": 1},
-    {"emoji": "🎭🃏", "answer": "조커", "level": 2},
-    {"emoji": "🧑‍🚀🤖🌍", "answer": "월E", "level": 1},
-    {"emoji": "👽🚲🌕", "answer": "E.T.", "level": 2},
-    {"emoji": "🍫👦🏭", "answer": "찰리와 초콜릿 공장", "level": 1},
-    {"emoji": "💞💔🚢", "answer": "타이타닉", "level": 1},
-    {"emoji": "🌪️🏠🧙‍♀️", "answer": "오즈의 마법사", "level": 3},
-    {"emoji": "🧞‍♂️🕌", "answer": "알라딘", "level": 1},
-    {"emoji": "🌊👸🐚", "answer": "인어공주", "level": 1},
-    {"emoji": "🐸👑💋", "answer": "공주와 개구리", "level": 2},
-    {"emoji": "🚗🏁", "answer": "카", "level": 1},
-    {"emoji": "🌹⏰🕯️", "answer": "미녀와 야수", "level": 1},
-    {"emoji": "🐘🎪", "answer": "덤보", "level": 1},
-    {"emoji": "🎤👹🎵🐅🕺", "answer": "케이팝 데몬 헌터스", "level": 2},
-    {"emoji": "🧟‍♂️🚆💥🚨", "answer": "부산행", "level": 1}
-]
-
-# --------------------
-# 상태 초기화
-if "score" not in st.session_state:
-    st.session_state.score = 0
-if "quiz_index" not in st.session_state:
-    st.session_state.quiz_index = random.randint(0, len(quiz_data)-1)
-if "answered" not in st.session_state:
-    st.session_state.answered = False
-if "correct" not in st.session_state:
-    st.session_state.correct = False
-
-# --------------------
-# UI 표시
-st.markdown("<h1 style='text-align:center;'>🍿 이모지 퀴즈: 무슨 영화일까요?</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center; font-size:20px;'>이모지를 보고 떠오르는 영화를 맞혀보세요!</p>", unsafe_allow_html=True)
-
-current = quiz_data[st.session_state.quiz_index]
-
-st.markdown(f"<div class='emoji-box'>{current['emoji']}</div>", unsafe_allow_html=True)
-
-# --------------------
-# 정답 입력
-if not st.session_state.answered:
-    answer = st.text_input("🎯 정답은?", key="answer_input")
-    if st.button("✅ 제출하기"):
-        if answer.strip().lower() == current["answer"].lower():
-            st.session_state.correct = True
-            st.session_state.score += 1
-        else:
-            st.session_state.correct = False
-        st.session_state.answered = True
-        st.experimental_set_query_params(dummy=random.randint(0, 10000))  # 강제 refresh 없이 키값 변화 유도
-        st.stop()
-
-# --------------------
-# 결과 표시
-if st.session_state.answered:
-    if st.session_state.correct:
-        st.markdown("<p class='correct'>🎉 정답입니다! 풍선 퐁퐁~</p>", unsafe_allow_html=True)
-        st.balloons()
-    else:
-        st.markdown(f"<p class='wrong'>😭 땡! 정답은 <b>{current['answer']}</b>입니다!</p>", unsafe_allow_html=True)
-
-    if st.button("🔄 다음 문제"):
-        st.session_state.quiz_index = random.randint(0, len(quiz_data)-1)
-        st.session_state.answered = False
-        st.session_state.correct = False
-        st.experimental_set_query_params(refresh=random.randint(0, 10000))  # 강제 refresh 유도
-        st.experimental_rerun()
-
-# --------------------
-# 점수
-st.markdown(f"<hr><h3 style='text-align:center;'>✨ 현재 점수: {st.session_state.score} 점 ✨</h3>", unsafe_allow_html=True)
+# 영화 데이터 (이모티콘, 영화 제목, 힌트, 카테고리)
+movies = [
+    # 일반 인기 영화
+    {"emoji": "👸❄️⛄", "title": "겨울왕국", "hint": "디즈니 애니메이션, 'Let It Go' 주제가로 유명해요", "category": "디즈니"},
+    {"emoji": "🧙‍♂️💍🌋", "title": "반지의 제왕", "hint": "반지를 파괴하기 위한 대장정", "category": "판타지"},
+    {"emoji": "🦁👑🌴", "title": "라이온 킹", "hint": "사자 왕자의 성장 이야기", "category": "디즈니"},
+    {"emoji": "🚢❄️💔", "title": "타이타닉", "hint": "빙산과 충돌한 비극적 사랑 이야기", "category": "로맨스"},
+    {"emoji": "👨‍🚀🌌👽", "title": "인터스텔라", "hint": "우주 여행과 시간의 상대성", "category": "SF"},
+    {"emoji": "🧙‍♂️⚡👓", "title": "해리 포터", "hint": "마법 학교의 소년 마법사", "category": "판타지"},
+    {"emoji": "🤖❤️🌱", "title": "월-E", "hint": "외로운 로봇의 사랑 이야기", "category": "픽사"},
+    {"emoji": "🦖🦕🏝️", "title": "쥬라기 공원", "hint": "공룡들이 살아있는 테마파크", "category": "모험"},
+    {"emoji": "🦇👨🃏", "title": "다크나이트", "hint": "배트맨과 조커의 대결", "category": "슈퍼히어로"},
+    {"emoji": "🔍🐠🌊", "title": "니모를 찾아서", "hint": "아빠 물고기가 아들을 찾아 떠나는 여정", "category": "픽사"},
+    
+    # 케이팝 데몬 헌터스
+    {"emoji": "👩‍🎤🎸👹⚔️", "title": "케이팝 데몬 헌터스", "hint": "K-pop 아이돌들이 악마 사냥꾼으로 활약하는 영화", "category": "K-콘텐츠"},
+    {"emoji": "🎤👹🔪🇰🇷", "title": "케이팝 데몬 헌터스: 악의 부활", "hint": "악마 사냥꾼 아이돌의 두 번째 이야기", "category": "K-콘텐츠"},
+    {"emoji": "👯‍♀️🔮👺🎵", "title": "케이팝 데몬 헌터스: 최후의 전투", "hint": "데몬 헌터스 시리즈의 완결편", "category": "K-콘텐츠"},
+    
+    # 디즈니 영화 추가
+    {"emoji": "🧜‍♀️🐠🌊👑", "title": "인어공주", "hint": "바다 속 공주의 인간 세계 모험", "category": "디즈니"},
